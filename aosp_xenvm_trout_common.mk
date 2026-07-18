@@ -24,6 +24,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGE_OVERLAYS += device/epam/aosp-xenvm-trout/overlay
 
 PRODUCT_VENDOR_PROPERTIES += vendor.ser.gnss-uart=/dev/vport6p2
+PRODUCT_VENDOR_PROPERTIES += ro.hardware.egl=mesa
 
 # Upstream mesa3d graphics dependancies
 PRODUCT_PACKAGES += \
