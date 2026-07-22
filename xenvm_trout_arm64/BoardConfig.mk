@@ -10,7 +10,14 @@ include device/google/trout/trout_arm64/BoardConfig.mk
 ifneq ($(TARGET_PREBUILT_MODULES_DIR),)
     # Set KERNEL_MODULES_PATH to the directory with modules
     KERNEL_MODULES_PATH := $(TARGET_PREBUILT_MODULES_DIR)
-    BOARD_VENDOR_RAMDISK_KERNEL_MODULES := $(filter-out $(TARGET_PREBUILT_MODULES_DIR),$(shell find $(TARGET_PREBUILT_MODULES_DIR) -type f -name *.ko))
+    _all_kernel_modules := $(filter-out $(TARGET_PREBUILT_MODULES_DIR),$(shell find $(TARGET_PREBUILT_MODULES_DIR) -type f -name *.ko))
+    # modules.load is emitted in BOARD_VENDOR_RAMDISK_KERNEL_MODULES order,
+    # not sorted by dependency (see build-image-kernel-modules-depmod in
+    # build/make/core/Makefile), so modules that others depend on must be
+    # listed first here.
+    _dep_order := rfkill.ko bluetooth.ko cfg80211.ko hci_vhci.ko mac80211.ko mac80211_hwsim.ko virt_wifi.ko
+    _dep_first := $(foreach m,$(_dep_order),$(filter %/$(m),$(_all_kernel_modules)))
+    BOARD_VENDOR_RAMDISK_KERNEL_MODULES := $(_dep_first) $(filter-out $(_dep_first),$(_all_kernel_modules))
     BOARD_VENDOR_KERNEL_MODULES := $(BOARD_VENDOR_RAMDISK_KERNEL_MODULES)
 endif
 
